@@ -19,6 +19,11 @@
 }
 
 /* Logic */
+.ace_editor span.ace_command {
+    color: rgb(181, 116, 197);
+}
+
+/* Logic */
 .ace_editor span.ace_var-decl,
 .ace_editor span.ace_list-decl,
 .ace_editor span.ace_logic:not(.ace_innerContent) {

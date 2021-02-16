@@ -217,6 +217,8 @@ var inkHighlightRules = function() {
             }, {
                 include: "#logicLineInsert"
             }, {
+                include: "#commandLineInsert"
+            }, {
                 regex: /(\(\s*)(\w+)(\s*\)\s*)/,
                 token: [
                     "gather.label",      // (
@@ -445,7 +447,39 @@ var inkHighlightRules = function() {
                 defaultToken: "logic.tilda"
             }]
         }],
-        "#tags": [{
+        "#commandLine": [{
+            token: "command",
+            regex: /^\s*\/[^\/]/,
+            push: [{
+                token: "command",
+                regex: /$/,
+                next: "pop"
+            }, {
+                include: "#escapes"
+            }, {
+                include: "#comments"
+            }, { 
+                include: "#inlineContent" 
+            }, {
+                defaultToken: "command"
+            }]
+        }],
+        "#commandLineInsert": [{
+            token: "command",
+            regex: /(?<!<)\/\s*(?=\w)/,
+            push: [{
+                token: "command",
+                regex: /$/,
+                next: "pop"
+            }, {
+                include: "#escapes"
+            }, {
+                include: "#comments"
+            }, {
+                defaultToken: "command"
+            }]
+        }],
+       "#tags": [{
             // e.g. #tag should be highlighted
             token: "tag",
             regex: /#/,
@@ -500,6 +534,8 @@ var inkHighlightRules = function() {
             include: "#endOfSection"
         }, {
             include: "#logicLine"
+        }, {
+            include: "#commandLine"
         }, {
             include: "#mixedContent"
         }]
