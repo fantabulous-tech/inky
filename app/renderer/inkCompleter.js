@@ -23,6 +23,11 @@ function getAllVocabWords(files) {
     return union(files.map((file) => file.symbols.getCachedVocabWords()));
 }
 
+// Helper function that gets all the vocabulary words from a list of InkFiles
+function getAllCommandWords(files) {
+    return union(files.map((file) => file.symbols.getCachedCommandWords()));
+}
+
 // Helper function that generates suggestions for all the divert targets
 function getAllDivertTargetSuggestions(inkFiles) {
     const targets = getAllDivertTargets(inkFiles);
@@ -65,6 +70,20 @@ function getAllVocabSuggestions(inkFiles) {
     return suggestions;
 }
 
+// Helper function that generates suggestions for all the commands
+function getAllCommandSuggestions(inkFiles) {
+    const commandWords = getAllCommandWords(inkFiles);
+    const suggestions = [];
+    for (const commandWord of commandWords) {
+        suggestions.push({
+            caption: commandWord,
+            value: commandWord,
+            meta: "Command",
+        });
+    }
+    return suggestions;
+}
+
 exports.inkCompleter = {
     inkFiles: [],
 
@@ -83,6 +102,7 @@ exports.inkCompleter = {
         const isCursorInFlow = (cursorToken.type.indexOf("flow") != -1);
         const isCursorInLabel = (cursorToken.type.indexOf(".label") != -1);
         const isCursorInLogic = (cursorToken.type.indexOf("logic") != -1);
+        const isCursorInCommand = (cursorToken.type.indexOf("command") != -1);
 
         // Ignore the prefix. ACE will find the most likely words in the list
         // for the prefix automatically.
@@ -96,6 +116,8 @@ exports.inkCompleter = {
             const vocabSuggestions = getAllVocabSuggestions(this.inkFiles);
             suggestions = divertTargetSuggestions.concat(variableSuggestions).
                     concat(vocabSuggestions);
+        } else if ( isCursorInCommand ) {
+            suggestions = getAllCommandSuggestions(this.inkFiles);
         } else {
             suggestions = getAllVocabSuggestions(this.inkFiles);
         }

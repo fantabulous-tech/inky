@@ -1,6 +1,7 @@
 const assert = require("assert");
 const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
 const _ = require("lodash");
+const { commands } = require("./acesrc/ext-beautify");
 
 function InkFileSymbols(inkFile, events) {
     this.inkFile = inkFile;
@@ -12,6 +13,7 @@ function InkFileSymbols(inkFile, events) {
     this.divertTargets = new Set();
     this.variables = new Set();
     this.vocabWords = new Set();
+    this.commandWords = new Set();
 
     this.inkFile.aceDocument.on("change", () => {
         this.dirty = true;
@@ -44,7 +46,10 @@ InkFileSymbols.prototype.parse = function() {
     ];
     const varTypes = [
         { name: "Variable", code: "var-decl"  },
-        { name: "List",     code: "list-decl" },
+        { name: "List",     code: "list-decl" }
+    ];
+    const commandTypes = [
+        { name: "Command", code: "command" },
     ];
     const topLevelInkFlow = { level: 0 };
 
@@ -64,6 +69,7 @@ InkFileSymbols.prototype.parse = function() {
     var divertTargets = new Set();
     var variables = new Set();
     var vocabWords = new Set();
+    var commandWords = new Set();
 
     var it = new TokenIterator(session, 0, 0);
 
@@ -85,6 +91,7 @@ InkFileSymbols.prototype.parse = function() {
 
             const flowType = findType(tok, flowTypes);
             const varType  = findType(tok, varTypes);
+            const commandType = findType(tok, commandTypes);
 
             if( flowType ) {
                 while( flowType.level <= symbolStack.currentElement().flowType.level )
@@ -118,6 +125,9 @@ InkFileSymbols.prototype.parse = function() {
             }
             else if( varType ) {
                 variables.add(symbolName);
+            }
+            else if ( commandType ) {
+                commandWords.add(symbolName);
             }
             // Not a knot/stitch/gather/choice nor a variable. Do nothing.
         }
@@ -159,6 +169,16 @@ InkFileSymbols.prototype.parse = function() {
             }
         }
 
+        // Command name
+        else if ( tok.type == "command" ) {
+            var words = tok.value.split(/\W+/);
+            words.forEach(word => {
+                if ( word.length >= 3) {
+                    commandWords.add(word);
+                }
+            });
+        }
+
         // Prose text
         else if( tok.type == "text" ) {
             var words = tok.value.split(/\W+/);
@@ -180,6 +200,7 @@ InkFileSymbols.prototype.parse = function() {
     this.divertTargets = divertTargets;
     this.variables = variables;
     this.vocabWords = vocabWords;
+    this.commandWords = commandWords;
 
     // Detect whether the includes actually changed at all
     var oldIncludes = this.includes || [];
@@ -257,6 +278,10 @@ InkFileSymbols.prototype.getCachedVariables = function() {
 
 InkFileSymbols.prototype.getCachedVocabWords = function() {
     return this.vocabWords;
+}
+
+InkFileSymbols.prototype.getCachedCommandWords = function() {
+    return this.commandWords;
 }
 
 exports.InkFileSymbols = InkFileSymbols;

@@ -448,12 +448,21 @@ var inkHighlightRules = function() {
             }]
         }],
         "#commandLine": [{
-            token: "command",
-            regex: /^\s*\/[^\/]/,
+            regex: /^\s*(\/)(\w+)/,
+            token: [
+                "command.slash",  // /
+                "command"   // command_name
+            ],
             push: [{
                 token: "command",
                 regex: /$/,
                 next: "pop"
+            }, {
+                regex: /(s+)(w+)/,
+                token: [
+                    "command",
+                    "command.option"
+                ]
             }, {
                 include: "#escapes"
             }, {
@@ -465,12 +474,21 @@ var inkHighlightRules = function() {
             }]
         }],
         "#commandLineInsert": [{
-            token: "command",
-            regex: /(?<!<)\/\s*(?=\w)/,
+            regex: /(\/)(\w+)/,
+            token: [
+                "command.slash",  // /
+                "command.name"   // command_name
+            ],
             push: [{
                 token: "command",
                 regex: /$/,
                 next: "pop"
+            }, {
+                regex: /(s+)(w+)/,
+                token: [
+                    "command",
+                    "command.option"
+                ]
             }, {
                 include: "#escapes"
             }, {
