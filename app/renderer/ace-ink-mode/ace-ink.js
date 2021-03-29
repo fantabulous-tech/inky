@@ -448,7 +448,7 @@ var inkHighlightRules = function() {
             }]
         }],
         "#commandLine": [{
-            regex: /^(\s*)(\/)(\s*)(\w+)/,
+            regex: /^(\s*)(\@)(\s*)(\w+)/,
             token: [
                 "command", // optional space
                 "command.slash",  // /
@@ -476,7 +476,7 @@ var inkHighlightRules = function() {
             }]
         }],
         "#commandLineInsert": [{
-            regex: /(\/)(\s*)(\w+)/,
+            regex: /(\@)(\s*)(\w+)/,
             token: [
                 "command.slash",  // /
                 "command", // optional space
